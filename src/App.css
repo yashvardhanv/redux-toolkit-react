@@ -1,0 +1,17 @@
+#root {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 2rem;
+    text-align: center;
+  }
+  .heading{
+    color: white;
+  }
+  /* form{
+    margin: 10px;
+    display: flex;
+    flex-direction: column;
+    border-radius: 10%;
+    align-items: center;
+    box-shadow: 2px 7px 7px cyan;
+  } */
