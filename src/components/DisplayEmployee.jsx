@@ -1,7 +1,9 @@
 import { useDispatch, useSelector } from "react-redux";
 import { selectAllEmployee, getEmpStatus, getEmpError, editEmployee, fetchEmp } from "../redux-toolkit/empSlice";
-import { TableContainer, Spinner, Table, Thead, Th, Tbody, Tr, Td, Button, HStack, ButtonGroup, Input, Text, VStack,useDisclosure,
-    AlertDialog, AlertDialogBody, AlertDialogContent, AlertDialogHeader, AlertDialogOverlay, AlertDialogFooter } from "@chakra-ui/react";
+import {
+    TableContainer, Spinner, Table, Thead, Th, Tbody, Tr, Td, Button, HStack, ButtonGroup, Input, Text, VStack, useDisclosure,
+    AlertDialog, AlertDialogBody, AlertDialogContent, AlertDialogHeader, AlertDialogOverlay, AlertDialogFooter, Wrap, WrapItem, Avatar
+} from "@chakra-ui/react";
 import { Link } from "react-router-dom";
 import { MdDelete, MdEdit } from "react-icons/md";
 import { IoArrowBack } from "react-icons/io5";
@@ -15,19 +17,24 @@ const DisplayEmployee = () => {
     const data = useSelector(selectAllEmployee);
     const empStatus = useSelector(getEmpStatus);
     const error = useSelector(getEmpError);
+    const [isSyncing, setSyncing] = useState(false)
     // const toast = useToast()
+
 
 
 
     const url = 'https://65c0b652dc74300bce8c98a7.mockapi.io/api/employee/'
     async function syncToDatabaseManually() {
+        setSyncing(true)
         const getRes = await axios.get(url)
         getRes.data.map(async (i) => {
             await axios.delete(url + i.id)
         })
-        console.log(data)
+        if (data.length === 0) {
+            setSyncing(false)
+        }
         data.map(async (i) => {
-            axios.post(url, i).then((res) => alert(res))
+            axios.post(url, i).then(setSyncing(false))
         })
     }
 
@@ -43,7 +50,16 @@ const DisplayEmployee = () => {
         designation: "",
         salary: 0,
         address: "",
+        avatar: ""
     });
+    const onImageChange = (event) => {
+        if (event.target.files && event.target.files[0]) {
+            setEditValues({
+                ...editValues,
+                avatar: URL.createObjectURL(event.target.files[0]),
+            });
+        }
+    }
     const [editable, setEditable] = useState(false);
     const [editId, setEditId] = useState(-1);
     function setter(item) {
@@ -67,18 +83,41 @@ const DisplayEmployee = () => {
                 <Table>
                     <Thead>
                         <Tr>
-                            <Th width={"20%"}>Name</Th>
-                            <Th width={"20%"}>Salary</Th>
-                            <Th width={"20%"}>Designation</Th>
-                            <Th width={"20%"}>Address</Th>
-                            <Th width={"20%"}>Action</Th>
+                            <Th width={"5%"}>Avatar</Th>
+                            <Th width={"16.6%"}>Name</Th>
+                            <Th width={"16.6%"}>Salary</Th>
+                            <Th width={"16.6%"}>Designation</Th>
+                            <Th width={"16.6%"}>Address</Th>
+                            <Th width={"16.6%"}>Action</Th>
                         </Tr>
                     </Thead>
                     <Tbody>
                         {/* {allData.length} */}
                         {data.map(function (item) {
                             return (
+
+
                                 <Tr key={item.id}>
+                                    {editable && item.id == editId ? (
+                                        <Td>
+                                            <label htmlFor="upload-photo" className="btn btn-secondary">Upoad</label>
+                                            <input
+                                                onChange={onImageChange}
+                                                id="upload-photo"
+                                                type="file"
+                                                className="CustomUpload"
+
+                                            />
+                                        </Td>) :
+                                        (
+                                            <Td>
+                                                <Wrap>
+                                                    <WrapItem>
+                                                        <Avatar src={item.avatar} />
+                                                    </WrapItem>
+                                                </Wrap>
+                                            </Td>)
+                                    }
                                     {editable && item.id === editId ? (
                                         <Td>
                                             <Input
@@ -195,8 +234,8 @@ const DisplayEmployee = () => {
                     </Tbody>
                 </Table>
                 <VStack>
-                    <Button onClick={onOpen}>Fetch</Button>
-                    <Button onClick={syncToDatabaseManually}>Sync</Button>
+                    <Button marginTop={3} colorScheme="green" onClick={onOpen}>Fetch</Button>
+                    <Button colorScheme="red" isLoading={isSyncing} loadingText={"Please wait"} onClick={syncToDatabaseManually}>Sync</Button>
                 </VStack>
             </TableContainer>
             <AlertDialog

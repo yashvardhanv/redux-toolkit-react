@@ -1,25 +1,34 @@
-import { Button , FormControl, FormLabel, Input, VStack, useToast } from "@chakra-ui/react"
+import { Button, FormControl, FormLabel, Input, VStack, useToast } from "@chakra-ui/react"
 import * as Yup from "yup"
 import { addEmployee } from "../redux-toolkit/empSlice"
-import {  useDispatch } from "react-redux"
+import { useDispatch } from "react-redux"
 import { useFormik } from "formik"
+import { useState } from "react"
 const InsertEmployee = () => {
     const dispatch = useDispatch()
     const toast = useToast()
+    const [image, setImage] = useState(null)
     const formik = useFormik({
         initialValues: {
             name: "",
             salary: "",
             designation: "",
-            address: ""
+            address: "",
+            avatar: ""
         },
         validationSchema: Yup.object({
             name: Yup.string().required(),
             salary: Yup.number().required(),
             designation: Yup.string().required(),
-            address: Yup.string().required()
+            address: Yup.string().required(),
         }),
         onSubmit: values => {
+            if(image===null){
+                values.avatar = "https://cdn.pixabay.com/photo/2018/11/13/21/43/avatar-3814049_1280.png" 
+            }
+            else{
+                values.avatar = image;
+            }
             toast({
                 title: 'Employee Inserted',
                 description: `${values.name} is registered`,
@@ -31,14 +40,18 @@ const InsertEmployee = () => {
             formik.resetForm()
         }
     })
-    
+    const onImageChange = (event) => {
+        if (event.target.files && event.target.files[0]) {
+            setImage(URL.createObjectURL(event.target.files[0]));
+        }
+    }
 
 
     return (
 
 
         <>
-    
+
             <form id="myform" name="myform" onSubmit={formik.handleSubmit}>
                 <FormControl>
                     <FormLabel>Name</FormLabel>
@@ -68,13 +81,17 @@ const InsertEmployee = () => {
                         <p className="text-danger">{formik.errors.address}</p>
                     ) : null}
                 </FormControl>
-                
+                <FormControl>
+                    <FormLabel>Upload your image</FormLabel>
+                    <input id="avatar" onChange={onImageChange} className="form-control" type='file' accept="image/png, image/jpeg" />
+                </FormControl>
+
                 <VStack>
-                <Button marginTop={5} type="submit" colorScheme='teal' size='md'>
-                    Submit
-                </Button>
+                    <Button marginTop={5} type="submit" colorScheme='teal' size='md'>
+                        Submit
+                    </Button>
                 </VStack>
-                
+
             </form>
 
         </>

@@ -26,6 +26,7 @@ export const EmpReducer = createSlice({
                 salary: action.payload.salary,
                 designation: action.payload.designation,
                 address: action.payload.address,
+                avatar:action.payload.avatar
             };
             state.employee.push(tempEmp);
         },
